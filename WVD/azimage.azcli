@@ -14,7 +14,19 @@ rg=aib-rg
 location=westeurope  # Check https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/solutions/12_Creating_AIB_Security_Roles/aibRoleImageCreation.json
 image_name=aib-custom-w2k
 run_output_name=aibCustWinManImg01ro  # image distribution metadata reference name
-user=emmclare
+user=emmclare   
 keyvault=RG-WVD-KV
 password=$(az keyvault secret show --vault-name $keyvault -n defaultPassword --query value -o tsv)
 subscription_id=$(az account show --query id -o tsv)
+
+
+az group create -n $rg -l $location
+rg_id=$(az group show -n $rg --query id -o tsv)
+
+# Custom role:
+filename=/tmp/aibRoleImageCreation.json
+curl https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/solutions/12_Creating_AIB_Security_Roles/aibRoleImageCreation.json -o $filename
+sed -i -e "s/<subscriptionID>/$subscription_id/g" $filename
+sed -i -e "s/<rgName>/$rg/g" $filename
+az role definition create --role-definition $filename
+az role definition list -n "Azure Image Builder Service Image Creation Role"
