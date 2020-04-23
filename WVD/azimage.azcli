@@ -1,1 +1,20 @@
 
+# Register feature
+az feature register --namespace Microsoft.VirtualMachineImages --name VirtualMachineTemplatePreview
+# Wait until the feature is registered
+az feature show --namespace Microsoft.VirtualMachineImages --name VirtualMachineTemplatePreview --query properties.state -o tsv
+# check you are registered for the providers
+az provider show -n Microsoft.VirtualMachineImages | grep registrationState
+az provider show -n Microsoft.Storage | grep registrationState
+az provider show -n Microsoft.Compute | grep registrationState
+az provider show -n Microsoft.KeyVault | grep registrationState
+
+# Initialization
+rg=aib-rg
+location=westeurope  # Check https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/solutions/12_Creating_AIB_Security_Roles/aibRoleImageCreation.json
+image_name=aib-custom-w2k
+run_output_name=aibCustWinManImg01ro  # image distribution metadata reference name
+user=jose
+keyvault=RG-WVD-KV
+password=$(az keyvault secret show --vault-name $keyvault -n defaultPassword --query value -o tsv)
+subscription_id=$(az account show --query id -o tsv)
